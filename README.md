@@ -116,7 +116,7 @@ python3 -m venv venv
 source venv/bin/activate
 
 # Install dependencies
-pip install flask yfinance pandas numpy scikit-learn requests lxml
+pip install -r requirements.txt
 
 # Run the application
 python3 app.py
