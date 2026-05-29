@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+dados/balancos_trimestrais.csv
+dados/historico_precos.csv
+dados/indicadores_atuais.csv
+dados/empresas.csv
+dados/empresas_dict.py
+testes/ 

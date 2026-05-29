@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fundamenta - Raio-X Financeiro</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    header h1 span { color: #6366f1; }
+    header p {
+      color: #94a3b8;
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    /* ── Search ── */
+    .search-box {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    .search-box input {
+      flex: 1;
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 10px;
+      padding: 0.85rem 1.2rem;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box input:focus { border-color: #6366f1; }
+    .search-box input::placeholder { color: #4a5568; }
+    .search-box button {
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.85rem 1.6rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .search-box button:hover { background: #4f46e5; }
+    .search-box button:disabled { background: #3730a3; cursor: not-allowed; }
+
+    /* ── Exemplos ── */
+    .exemplos {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+    .exemplos span {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 6px;
+      padding: 0.25rem 0.6rem;
+      margin: 0 0.2rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      display: inline-block;
+    }
+    .exemplos span:hover { border-color: #6366f1; color: #a5b4fc; }
+
+    /* ── Loading ── */
+    #loading {
+      text-align: center;
+      padding: 2rem;
+      color: #64748b;
+      display: none;
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #1e2130;
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Erro ── */
+    #erro {
+      background: #2d1b1b;
+      border: 1px solid #7f1d1d;
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      color: #fca5a5;
+      display: none;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Dashboard ── */
+    #resultado { display: none; }
+
+    .empresa-header {
+      margin-bottom: 1.5rem;
+    }
+    .empresa-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .empresa-header .meta {
+      color: #64748b;
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Card de classificação ── */
+    .card-classificacao {
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid transparent;
+    }
+    .card-classificacao.saudavel {
+      background: #0d2818;
+      border-color: #166534;
+    }
+    .card-classificacao.atencao {
+      background: #1c1a0a;
+      border-color: #854d0e;
+    }
+    .card-classificacao.risco {
+      background: #1f0d0d;
+      border-color: #7f1d1d;
+    }
+
+    .classificacao-topo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    .badge {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .badge.saudavel { color: #4ade80; }
+    .badge.atencao  { color: #facc15; }
+    .badge.risco    { color: #f87171; }
+
+    .icone { font-size: 2rem; }
+
+    /* ── Barras de probabilidade ── */
+    .probabilidades { display: flex; flex-direction: column; gap: 0.6rem; }
+    .prob-linha {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+    .prob-label { width: 70px; color: #94a3b8; }
+    .prob-barra-bg {
+      flex: 1;
+      background: #0f1117;
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .prob-barra {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.6s ease;
+    }
+    .prob-barra.saudavel { background: #4ade80; }
+    .prob-barra.atencao  { background: #facc15; }
+    .prob-barra.risco    { background: #f87171; }
+    .prob-valor { width: 36px; text-align: right; color: #e2e8f0; font-weight: 600; }
+
+    /* ── Cards de métricas ── */
+    .metricas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .metrica-card {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .metrica-card .label {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .metrica-card .valor {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .metrica-card .valor.positivo { color: #4ade80; }
+    .metrica-card .valor.negativo { color: #f87171; }
+
+    /* ── Importância das features ── */
+    .features-card {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .features-card h3 {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.2rem;
+    }
+    .feature-linha {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+      font-size: 0.9rem;
+    }
+    .feature-nome { width: 180px; color: #cbd5e1; }
+    .feature-barra-bg {
+      flex: 1;
+      background: #0f1117;
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .feature-barra {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #6366f1, #a78bfa);
+      transition: width 0.6s ease;
+    }
+    .feature-pct {
+      width: 40px;
+      text-align: right;
+      color: #a78bfa;
+      font-weight: 600;
+    }
+
+    /* ── Aviso ── */
+    .aviso {
+      background: #1a1f2e;
+      border: 1px solid #2d3148;
+      border-radius: 10px;
+      padding: 0.85rem 1.2rem;
+      font-size: 0.8rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .aviso strong { color: #94a3b8; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Fundamenta</h1>
+    <p>Análise de saúde financeira de empresas da B3 com Machine Learning</p>
+  </header>
+
+  <div class="search-box">
+    <input
+      type="text"
+      id="ticker-input"
+      placeholder="Digite o ticker (ex: PETR4, WEGE3, MGLU3)"
+      autocomplete="off"
+      autocapitalize="characters"
+    />
+    <button id="btn-analisar" onclick="analisar()">Analisar</button>
+  </div>
+
+  <div class="exemplos">
+    Exemplos:
+    <span onclick="analisarTicker('PETR4')">PETR4</span>
+    <span onclick="analisarTicker('WEGE3')">WEGE3</span>
+    <span onclick="analisarTicker('MGLU3')">MGLU3</span>
+    <span onclick="analisarTicker('VALE3')">VALE3</span>
+    <span onclick="analisarTicker('TOTS3')">TOTS3</span>
+  </div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    Buscando dados e analisando...
+  </div>
+
+  <div id="erro"></div>
+
+  <div id="resultado">
+    <div class="empresa-header">
+      <h2 id="res-nome"></h2>
+      <div class="meta" id="res-meta"></div>
+    </div>
+
+    <!-- Classificação + probabilidades -->
+    <div class="card-classificacao" id="card-class">
+      <div class="classificacao-topo">
+        <div class="icone" id="res-icone"></div>
+        <div class="badge" id="res-badge"></div>
+      </div>
+      <div class="probabilidades">
+        <div class="prob-linha">
+          <span class="prob-label">Saudável</span>
+          <div class="prob-barra-bg">
+            <div class="prob-barra saudavel" id="barra-saudavel" style="width:0%"></div>
+          </div>
+          <span class="prob-valor" id="val-saudavel"></span>
+        </div>
+        <div class="prob-linha">
+          <span class="prob-label">Atenção</span>
+          <div class="prob-barra-bg">
+            <div class="prob-barra atencao" id="barra-atencao" style="width:0%"></div>
+          </div>
+          <span class="prob-valor" id="val-atencao"></span>
+        </div>
+        <div class="prob-linha">
+          <span class="prob-label">Risco</span>
+          <div class="prob-barra-bg">
+            <div class="prob-barra risco" id="barra-risco" style="width:0%"></div>
+          </div>
+          <span class="prob-valor" id="val-risco"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas principais -->
+    <div class="metricas">
+      <div class="metrica-card">
+        <div class="label">Lucro Líquido</div>
+        <div class="valor" id="met-lucro"></div>
+      </div>
+      <div class="metrica-card">
+        <div class="label">Receita</div>
+        <div class="valor" id="met-receita"></div>
+      </div>
+      <div class="metrica-card">
+        <div class="label">Margem Líquida</div>
+        <div class="valor" id="met-margem"></div>
+      </div>
+      <div class="metrica-card">
+        <div class="label">Caixa</div>
+        <div class="valor" id="met-caixa"></div>
+      </div>
+      <div class="metrica-card">
+        <div class="label">Alavancagem</div>
+        <div class="valor" id="met-alavancagem"></div>
+      </div>
+    </div>
+
+    <!-- Importância das features -->
+    <div class="features-card">
+      <h3>Indicadores que mais pesaram nesta análise</h3>
+      <div id="features-lista"></div>
+    </div>
+
+    <!-- Aviso -->
+    <div class="aviso">
+      <strong>Importante:</strong> Esta análise é baseada em dados históricos e
+      indicadores fundamentalistas. <strong>Não constitui recomendação de compra
+      ou venda.</strong> Fatores externos (cenário macroeconômico, eventos
+      setoriais, decisões de gestão) não são capturados pelo modelo.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Enter no campo de texto dispara análise
+  document.getElementById("ticker-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") analisar();
+  });
+
+  function analisarTicker(ticker) {
+    document.getElementById("ticker-input").value = ticker;
+    analisar();
+  }
+
+  function analisar() {
+    const ticker = document.getElementById("ticker-input").value.trim();
+    if (!ticker) return;
+
+    // Resetar interface
+    document.getElementById("resultado").style.display = "none";
+    document.getElementById("erro").style.display = "none";
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("btn-analisar").disabled = true;
+
+    const form = new FormData();
+    form.append("ticker", ticker);
+
+    fetch("/analisar", { method: "POST", body: form })
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("btn-analisar").disabled = false;
+
+        if (data.erro) {
+          const el = document.getElementById("erro");
+          el.textContent = data.erro;
+          el.style.display = "block";
+          return;
+        }
+
+        renderizar(data);
+      })
+      .catch(() => {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("btn-analisar").disabled = false;
+        const el = document.getElementById("erro");
+        el.textContent = "Erro de conexão. Verifique sua internet e tente novamente.";
+        el.style.display = "block";
+      });
+  }
+
+  function renderizar(data) {
+    const info = data.info;
+    const classe = data.classificacao.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace("atencao", "atencao");
+
+    const classeCSS = {
+      "saudável": "saudavel",
+      "atenção":  "atencao",
+      "risco":    "risco",
+    }[data.classificacao.toLowerCase()] || "atencao";
+
+    const icones = { saudavel: "✅", atencao: "⚠️", risco: "🔴" };
+
+    // Cabeçalho
+    document.getElementById("res-nome").textContent = info.nome;
+    document.getElementById("res-meta").textContent =
+      `${info.ticker} · ${info.setor} · Dados de ${info.trimestre}`;
+
+    // Badge de classificação
+    const card = document.getElementById("card-class");
+    card.className = `card-classificacao ${classeCSS}`;
+    document.getElementById("res-icone").textContent = icones[classeCSS];
+    const badge = document.getElementById("res-badge");
+    badge.textContent = data.classificacao;
+    badge.className = `badge ${classeCSS}`;
+
+    // Barras de probabilidade
+    setTimeout(() => {
+      document.getElementById("barra-saudavel").style.width = data.prob_saudavel + "%";
+      document.getElementById("barra-atencao").style.width  = data.prob_atencao  + "%";
+      document.getElementById("barra-risco").style.width    = data.prob_risco    + "%";
+    }, 100);
+    document.getElementById("val-saudavel").textContent = data.prob_saudavel + "%";
+    document.getElementById("val-atencao").textContent  = data.prob_atencao  + "%";
+    document.getElementById("val-risco").textContent    = data.prob_risco    + "%";
+
+    // Métricas
+    function formatarBi(val) {
+      if (val === null || val === undefined) return "N/D";
+      return `R$ ${val}B`;
+    }
+    function formatarPct(val) {
+      if (val === null || val === undefined) return "N/D";
+      return `${val}%`;
+    }
+
+    const elLucro = document.getElementById("met-lucro");
+    elLucro.textContent = formatarBi(info.lucro_bi);
+    elLucro.className = "valor " + (info.lucro_bi > 0 ? "positivo" : info.lucro_bi < 0 ? "negativo" : "");
+
+    document.getElementById("met-receita").textContent    = formatarBi(info.receita_bi);
+    document.getElementById("met-caixa").textContent      = formatarBi(info.caixa_bi);
+
+    const elMargem = document.getElementById("met-margem");
+    elMargem.textContent = formatarPct(info.margem_pct);
+    elMargem.className = "valor " + (info.margem_pct > 0 ? "positivo" : info.margem_pct < 0 ? "negativo" : "");
+
+    document.getElementById("met-alavancagem").textContent =
+      info.alavancagem !== null ? info.alavancagem : "N/D";
+
+    // Features
+    const lista = document.getElementById("features-lista");
+    lista.innerHTML = "";
+    data.top_features.forEach(f => {
+      lista.innerHTML += `
+        <div class="feature-linha">
+          <span class="feature-nome">${f.nome}</span>
+          <div class="feature-barra-bg">
+            <div class="feature-barra" style="width: 0%"
+                 data-pct="${f.importancia / 30 * 100}"></div>
+          </div>
+          <span class="feature-pct">${f.importancia}%</span>
+        </div>`;
+    });
+
+    // Animar barras de features
+    setTimeout(() => {
+      document.querySelectorAll(".feature-barra").forEach(b => {
+        b.style.width = b.dataset.pct + "%";
+      });
+    }, 150);
+
+    document.getElementById("resultado").style.display = "block";
+  }
+</script>
+</body>
+</html>
