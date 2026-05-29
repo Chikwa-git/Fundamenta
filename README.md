@@ -173,4 +173,4 @@ It is part of a portfolio connecting software development with business domain k
 **Lincoln** — Career transitioner into software development.
 Studying Systems Analysis and Development at Faculdade Descomplica, São Paulo, Brazil.
 
-[GitHub](https://github.com/Chikwa-git) · [LinkedIn](https://linkedin.com/in/seu-perfil)
+[GitHub](https://github.com/Chikwa-git) · [LinkedIn](https://www.linkedin.com/in/lincoln-neves100/)
